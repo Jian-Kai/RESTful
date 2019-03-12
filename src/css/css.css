@@ -1,0 +1,12 @@
+.wrap {
+    display: grid;
+    grid-template-columns: 5% auto 5%;
+    grid-template-rows: 3vh auto;
+    grid-template-areas: "header header header " "Lside  main Rside";
+    height: 100vh;
+}
+
+.Main-area {
+    grid-area: main;
+    padding: 2vh
+}

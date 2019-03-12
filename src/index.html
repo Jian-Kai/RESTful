@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <link rel="shortcut icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- boostrap 4-->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+
+    <script src="js/RESTapi.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/css.css">
+
+    <title>RESTful App</title>
+</head>
+
+<body>
+
+    <div class="wrap">
+        <div class="Main-area container">
+            <div class="row justify-content-md-center">
+                <div class="col-lg-auto btn-group ">
+                    <button id="dropdown" type="button" class="btn btn-danger"
+                        style="width: 7vw; font-size:2vw">Get</button>
+                    <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" onclick="select(this)">Get</a>
+                        <a class="dropdown-item" onclick="select(this)">Post</a>
+                    </div>
+                </div>
+                <div class="col-lg-8 align-self-center"> <a class="badge badge-light" style="font-size:2vw"
+                        href="http://localhost:3001/Todo"> http://localhost:3001/Todo </a> </div>
+            </div>
+            <hr>
+            <div class="row"
+                style="height: 37vh; background-color:azure; padding: 1vh ; border-radius: 1vh; border: 1px gray solid">
+                <div class="col">
+                    <h2> Input </h2>
+                    <hr>
+                    <div id="Tag"></div>
+                    <button type="button" class="btn btn-primary" onclick="submit()">Send</button>
+                </div>
+            </div>
+            <hr>
+            <div class="row"
+                style="height: 42vh; background-color:azure; padding: 1vh; border-radius: 1vh; border: 1px gray solid">
+                <div class="col">
+                    <h2> Result </h2>
+                    <hr>
+                    <div id="Result"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</body>
+
+<script type="text/javascript">
+    let option = 'Get';
+    let data = null;
+    let tag_name = [];
+    let length = 0
+    let edit_id = null;
+
+    function select(opt) {
+        document.getElementById("dropdown").innerText = opt.innerText
+        option = opt.innerText
+        console.log(option)
+        switch (option) {
+            case 'Get':
+                optin_get()
+                console.log(option)
+                break;
+            case 'Post':
+                if (document.getElementById("Tag").children.length > 0)
+                    document.getElementById("Tag").removeChild(document.getElementById("Tag").childNodes[0])
+                generate_input()
+                /*if (document.getElementById("Tag").children.length <= 0) {
+                    generate_input()
+                }*/
+                console.log(option)
+                break;
+            default:
+                break;
+        }
+    }
+
+    function submit() {
+        switch (option) {
+            case 'Get':
+                optin_get()
+                console.log(option)
+                break;
+            case 'Post':
+                optin_post()
+                console.log(option)
+                break;
+            case 'Patch':
+                optin_patch(edit_id)
+                console.log(option)
+                break;
+            default:
+                break;
+        }
+    }
+
+    async function optin_get() {
+        data = await get();
+        console.log(data)
+
+        const table = document.createElement('table')
+        table.className = 'table'
+
+        //table head
+        const thead = document.createElement('thead')
+        const thr = document.createElement('tr')
+        for (var tag in data[0]) {
+            const th = document.createElement('th')
+            const node = document.createElement("span")
+            const text = document.createTextNode(tag);
+            node.appendChild(text);
+            th.appendChild(node)
+            thr.appendChild(th)
+        }
+        const th = document.createElement('th')
+        const node = document.createElement("span")
+        const text = document.createTextNode('Edit');
+        node.appendChild(text);
+        th.appendChild(node)
+        thr.appendChild(th)
+        thead.appendChild(thr)
+        table.appendChild(thead)
+
+        //table body
+        const tbody = document.createElement('tbody')
+        for (var i = 0; i < data.length; i++) {
+            const tr = document.createElement('tr')
+            for (var tag in data[i]) {
+                const td = document.createElement('td')
+                    const node = document.createElement("span")
+                    const text = document.createTextNode(data[i][tag]);
+                    node.appendChild(text);
+                    td.appendChild(node);
+                    tr.appendChild(td);
+            }
+            const td = document.createElement('td')
+            const node = document.createElement("button")
+            node.setAttribute('onclick', 'edit(' + i + ')')
+            const text = document.createTextNode("Select");
+            node.appendChild(text);
+            td.appendChild(node);
+            tr.appendChild(td);
+            tbody.appendChild(tr)
+        }
+        table.append(tbody)
+
+        document.getElementById("Result").appendChild(table)
+    }
+
+    function edit(id) {
+        edit_id = id
+        option = "Patch"
+        document.getElementById("dropdown").innerText = "Patch"
+        if (document.getElementById("Tag").children.length > 0)
+            document.getElementById("Tag").removeChild(document.getElementById("Tag").childNodes[0])
+
+        
+        const divO = document.createElement("div")
+        divO.id = 'group'
+        for (tag in data[0]) {
+            if (tag != 'id') {
+                tag_name.push(tag)
+                //tag
+                const span = document.createElement("span")
+                span.className = "input-group-text"
+                span.style = "width:7vw"
+                const text = document.createTextNode(tag);
+                span.appendChild(text)
+                const div = document.createElement("div")
+                div.className = "input-group-prepend"
+                div.appendChild(span)
+                //input 
+                const node = document.createElement("input")
+                node.className = "form-control"
+                node.placeholder = data[id][tag]
+                //div
+                const outside = document.createElement("div")
+                outside.className = "input-group mb-3"
+                outside.appendChild(div)
+                outside.appendChild(node)
+
+                divO.appendChild(outside)
+            }
+
+        }
+        document.getElementById("Tag").appendChild(divO)
+    }
+
+    async function optin_post() {
+        const child = document.getElementById("group").children
+        console.log(child[0].children[1].value)
+        let json = {}
+        json['id'] = length + 1;
+        for (var i = 0; i < child.length; i++) {
+            json[tag_name[i]] = child[i].children[1].value
+            child[i].children[1].value = ''
+        }
+        json['Complete'] = false;
+        await post(json)
+    }
+
+    async function generate_input() {
+        data = await get();
+        length = data.length;
+        const divO = document.createElement("div")
+        divO.id = 'group'
+        for (tag in data[0]) {
+            if (tag != 'id' && tag != 'Complete') {
+                tag_name.push(tag)
+                //tag
+                const span = document.createElement("span")
+                span.className = "input-group-text"
+                span.style = "width:7vw"
+                const text = document.createTextNode(tag);
+                span.appendChild(text)
+                const div = document.createElement("div")
+                div.className = "input-group-prepend"
+                div.appendChild(span)
+                //input 
+                const node = document.createElement("input")
+                node.className = "form-control"
+                //div
+                const outside = document.createElement("div")
+                outside.className = "input-group mb-3"
+                outside.appendChild(div)
+                outside.appendChild(node)
+
+                divO.appendChild(outside)
+            }
+
+        }
+        document.getElementById("Tag").appendChild(divO)
+    }
+
+    async function optin_patch(id) {
+
+        const child = document.getElementById("group").children
+        console.log(child[0].children[1].value)
+        let json = {}
+        json['id'] = id;
+        for (var i = 0; i < child.length; i++) {
+            if(child[i].children[1].value)
+                json[tag_name[i]] = child[i].children[1].value
+        }
+        console.log(id)
+        console.log(json)
+        await patch(id, json)
+    }
+
+
+</script>
+
+</html>
